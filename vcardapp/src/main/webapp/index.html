@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get vCard</title>
+  
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"> 
+    <style>
+        body    { padding-top:30px; }
+    </style>
+
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+  
+
+  
+</head>
+<body ng-app="app" ng-controller="controller">
+      <div class="row" >
+      <div class="col-md-6">
+         <div class="col-sm-8 col-sm-offset-2">
+		    
+		    <!-- PAGE HEADER -->
+		    <div class="page-header"><h1>AngularJS Form Validation</h1></div>
+		   
+		    <!-- FORM -->
+			<!-- pass in the variable if our form is valid or invalid -->
+
+			<form name="userForm" ng-submit="submitForm(userForm.$valid)" novalidate>
+				<!-- novalidate prevents HTML5 validation since we will be validating ourselves -->
+
+				<div class="form-group">
+				<!-- Subject -->
+					<label>Subject</label> 
+					<input type="text" name="subject" class="form-control" ng-model="subject" required>
+					<p ng-show="userForm.subject.$invalid && !userForm.subject.$pristine" class="help-block">Subject is required.</p>
+				</div>
+				
+
+				<!-- EMAIL FROM -->
+				<div class="form-group">
+					<label>From</label> <input type="email" name="from"
+						class="form-control" ng-model="from">
+					<p ng-show="userForm.from.$invalid && !userForm.from.$pristine"
+						class="help-block">Enter a valid email.</p>
+				</div>
+				
+				<!-- EMAIL TO -->
+				<div class="form-group">
+					<label>To</label> <input type="email" name="to"
+						class="form-control" ng-model="to">
+					<p ng-show="userForm.to.$invalid && !userForm.to.$pristine"
+						class="help-block">Enter a valid email.</p>
+				</div>
+				
+				<!-- EMAIL CC -->
+				<div class="form-group">
+					<label>Copy</label> <input type="email" name="cc"
+						class="form-control" ng-model="cc">
+					<p ng-show="userForm.cc.$invalid && !userForm.cc.$pristine"
+						class="help-block">Enter a valid email.</p>
+				</div>
+				
+				<!-- CONTENT -->
+				<div class="form-group">
+				<label>Message</label><textarea class="form-control" ng-model="content">
+				</textarea></div>
+				
+				
+				<!-- ADDRESSING MODE -->
+				<div class="form-group">
+				<label>Addressing Mode : </label>
+				  <select ng-model="mode" required>
+				    <option value="EXPLICIT_FROM">EXPLICIT_FROM
+				    <option value="EXPLICIT_TO">EXPLICIT_TO
+				    <option value="OTHER">OTHER
+				  </select>
+				 </div>
+				 
+				 <!--ANALYSIS STRATEGY -->
+				 
+				 <div class="form-group">
+				<label>Analysis Strategy : </label>
+				  <select ng-model="strategy" required>
+				    <option value="KWAGA_CORE">KWAGA_CORE
+				    <option value="WTN_EVERYWHERE">WTN_EVERYWHERE
+				  </select>
+				 </div>
+				
+				<!-- SUBMIT BUTTON -->
+			<button class="btn btn-primary" ng-disabled="userForm.$invalid" ng-click="getVCard(subject, from, to, cc, content, mode, strategy)">Submit</button>
+				
+
+
+			</form>
+		
+		  </div>
+		   </div>
+         
+       <div class="col-md-4">
+          <div class="check-element sample-show-hide" ng-show="isContact">
+                <div class="page-header"><h1>Contact Information</h1></div>
+                    <div class="form-group"><label>Firstname : </label> {{contact.firstName}}</div> 
+                    <div class="form-group"> <label>Lastname:</label> {{contact.lastName}}</div> 
+                    <div class="form-group"><label>Full name:</label> {{contact.fullName}}</div> 
+                    <div class="form-group"><label>Organization:</label> {{contact.organization}}</div> 
+                    <div class="form-group"><label>Job position:</label> {{contact.jobPosition}}</div> 
+                    <div ng-repeat="field in contact.fields">
+                      <div ng-switch on="field.type">
+                        <div ng-switch-when="ADDRESS">
+                             <div class="form-group"><label>Street address :</label> {{field.value.streetAddress}}  </div>
+                             <div class="form-group"><label>Extended address: </label> {{field.value.getExtendedAddress}}</div>
+                             <div class="form-group"><label>Postal Code: </label> {{field.value.postalCode}}</div>
+                             <div class="form-group"><label>City: </label>{{field.value.city}} </div>
+                             <div class="form-group"><label>State:</label> {{field.value.state}} </div>
+                             <div class="form-group"><label>Country: </label> {{field.value.getCountry}}</div>
+            
+                          </div>
+                          <div ng-switch-default>
+                          <div class="form-group">  <label>  Field: </label> {{field.type}}  {{field.kind}} {{field.value.value}};</div>
+                          </div>
+                      </div>
+ 
+            </div>
+          </div> 
+           </div>
+
+         
+      </div>           
+        
+<script>
+var app = angular.module("app", []);
+ app.controller("controller", function ($scope, $http) {
+    $scope.isContact = false;
+    $scope.getVCard = function(subject, from, to, cc, content, mode, strategy) {
+  	  $http({
+            url: '/vcardapp/rest/EmailService/contact',
+            method: 'GET',
+            params: {
+          	  subject: subject,
+          	  from: from,
+          	  to: to,
+          	  cc: cc,
+          	  content: content,
+          	  mode: mode,
+          	  strategy: strategy
+            }
+        }).then(function successCallback(response) {
+    		$scope.contact = response.data;
+    		$scope.isContact = true;
+    	  }, function errorCallback(response) {
+    		  $scope.isContact = false;
+    	  });
+        
+
+
+    };
+    //{"firstName":"Anne","lastName":"Deï¿½Forsan","fullName":"Anneï¿½Deï¿½Forsan","organization":"Storiesout","jobPosition":"Founderï¿½\u0026ï¿½CEO","fields":[{"type":"PHONE","kind":"MOBILE","value":{"value":"+33ï¿½6ï¿½07ï¿½67ï¿½30 38"}},{"type":"PHONE","kind":"WORK","value":{"value":"+33ï¿½9ï¿½81ï¿½86ï¿½41 81"}},{"type":"EMAIL","kind":"WORK","value":{"value":"annedeforsan@storiesout.com"}},{"type":"ADDRESS","kind":"WORK","value":{"value":"7ï¿½passageï¿½duï¿½Chantier, 75012 Paris","streetAddress":"7ï¿½passageï¿½duï¿½Chantier","extendedAddress":"","postalCode":"75012","city":"Paris","state":"","country":""}},{"type":"SOCIAL_NETWORK","kind":"TWITTER","value":{"value":"http://www.twitter.com/adeforsan"}},{"type":"SOCIAL_NETWORK","kind":"LINKED_IN","value":{"value":"http://fr.linkedin.com/in/annedeforsan"}},{"type":"SOCIAL_NETWORK","kind":"SKYPE","value":{"value":"achidaye"}}]}
+});
+ 
+</script>
+</body>
+
+
+</html>
